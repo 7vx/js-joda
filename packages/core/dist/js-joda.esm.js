@@ -1,4 +1,4 @@
-//! @version @js-joda/core - 4.1.0
+//! @version @js-joda/core - 4.1.0-cs1
 //! @copyright (c) 2015-present, Philipp Thürwächter, Pattrick Hüper & js-joda contributors
 //! @copyright (c) 2007-present, Stephen Colebourne & Michael Nascimento Santos
 //! @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
@@ -11012,6 +11012,8 @@ var LocalDateTime = function (_ChronoLocalDateTime) {
     if (arguments.length === 2 && nanoOfSecond instanceof ZoneOffset) {
       offset = nanoOfSecond;
       nanoOfSecond = 0;
+    } else if (arguments.length === 2 && nanoOfSecond instanceof ZoneId) {
+      return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), nanoOfSecond);
     }
 
     requireNonNull(offset, 'offset');
@@ -12232,13 +12234,13 @@ var Instant = function (_Temporal) {
   };
 
   Instant.ofEpochSecond = function ofEpochSecond(epochSecond, nanoAdjustment) {
-    if (nanoAdjustment === void 0) {
-      nanoAdjustment = 0;
+    if (nanoAdjustment == null) {
+      return Instant._create(epochSecond, 0);
+    } else {
+      var secs = epochSecond + MathUtil.floorDiv(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
+      var nos = MathUtil.floorMod(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
+      return Instant._create(secs, nos);
     }
-
-    var secs = epochSecond + MathUtil.floorDiv(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
-    var nos = MathUtil.floorMod(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
-    return Instant._create(secs, nos);
   };
 
   Instant.ofEpochMilli = function ofEpochMilli(epochMilli) {
@@ -13207,6 +13209,62 @@ function _init$n() {
   ZoneId.UTC = ZoneOffset.ofTotalSeconds(0);
 }
 
+function ofEpochSecond(constructor, epochSecond, zoneId) {
+  return constructor.ofInstant(Instant.ofEpochSecond(epochSecond), zoneId);
+}
+
+function addEpochSecond(constructor) {
+  constructor.ofEpochSecond = function (epochSecond, zoneId) {
+    return ofEpochSecond(constructor, epochSecond, zoneId);
+  };
+}
+
+function addComparable(constructor) {
+  constructor.prototype.isEqual = function (other) {
+    return this.compareTo(other) === 0;
+  };
+}
+
+function addComparableEx(constructor, skip) {
+  if (skip === void 0) {
+    skip = false;
+  }
+
+  if (!skip) {
+    addComparable(constructor);
+  }
+
+  constructor.prototype.isEqualOrAfter = function (other) {
+    return this.compareTo(other) >= 0;
+  };
+
+  constructor.prototype.isEqualOrBefore = function (other) {
+    return this.compareTo(other) <= 0;
+  };
+}
+
+function initCustom() {
+  addEpochSecond(LocalDate);
+  addEpochSecond(LocalTime);
+  addEpochSecond(ZonedDateTime);
+  addComparable(ChronoUnit);
+  addComparable(Duration);
+  addComparable(ZoneOffset);
+  addComparable(DayOfWeek);
+  addComparable(Month);
+  addComparable(ZoneOffsetTransition);
+  addComparableEx(Instant);
+  addComparableEx(LocalDate);
+  addComparableEx(LocalDateTime);
+  addComparableEx(LocalTime);
+  addComparableEx(MonthDay);
+  addComparableEx(Year);
+  addComparableEx(YearMonth);
+  addComparableEx(OffsetDateTime, true);
+  addComparableEx(OffsetTime, true);
+  addComparableEx(ChronoZonedDateTime, true);
+}
+
 /*
  * @copyright (c) 2016, Philipp Thürwächter & Pattrick Hüper
  * @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
@@ -13243,6 +13301,7 @@ function init() {
   _init$9();
   _init$h();
   _init$f();
+  initCustom();
 }
 
 init();
@@ -13454,4 +13513,32 @@ var jsJodaExports = {
 var use = bindUse(jsJodaExports);
 jsJodaExports.use = use;
 
-export { ArithmeticException, ChronoField, ChronoLocalDate, ChronoLocalDateTime, ChronoUnit, ChronoZonedDateTime, Clock, DateTimeException, DateTimeFormatter, DateTimeFormatterBuilder, DateTimeParseException, DayOfWeek, DecimalStyle, Duration, IllegalArgumentException, IllegalStateException, Instant, IsoChronology, IsoFields, LocalDate, LocalDateTime, LocalTime, Month, MonthDay, NullPointerException, OffsetDateTime, OffsetTime, Period, ResolverStyle, SignStyle, Temporal, TemporalAccessor, TemporalAdjuster, TemporalAdjusters, TemporalAmount, TemporalField, TemporalQueries, TemporalQuery, TemporalUnit, TextStyle, UnsupportedTemporalTypeException, ValueRange, Year, YearConstants, YearMonth, ZoneId, ZoneOffset, ZoneOffsetTransition, ZoneRegion, ZoneRules, ZoneRulesProvider, ZonedDateTime, _, convert, nativeJs, use };
+function maxOf() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  if (args.length === 0) {
+    return undefined;
+  }
+
+  return args.reduce(function (prev, curr) {
+    return prev.compareTo(curr) >= 0 ? prev : curr;
+  });
+}
+
+function minOf() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  if (args.length === 0) {
+    return undefined;
+  }
+
+  return args.reduce(function (prev, curr) {
+    return prev.compareTo(curr) <= 0 ? prev : curr;
+  });
+}
+
+export { ArithmeticException, ChronoField, ChronoLocalDate, ChronoLocalDateTime, ChronoUnit, ChronoZonedDateTime, Clock, DateTimeException, DateTimeFormatter, DateTimeFormatterBuilder, DateTimeParseException, DayOfWeek, DecimalStyle, Duration, IllegalArgumentException, IllegalStateException, Instant, IsoChronology, IsoFields, LocalDate, LocalDateTime, LocalTime, Month, MonthDay, NullPointerException, OffsetDateTime, OffsetTime, Period, ResolverStyle, SignStyle, Temporal, TemporalAccessor, TemporalAdjuster, TemporalAdjusters, TemporalAmount, TemporalField, TemporalQueries, TemporalQuery, TemporalUnit, TextStyle, UnsupportedTemporalTypeException, ValueRange, Year, YearConstants, YearMonth, ZoneId, ZoneOffset, ZoneOffsetTransition, ZoneRegion, ZoneRules, ZoneRulesProvider, ZonedDateTime, _, convert, maxOf, minOf, nativeJs, use };

@@ -1,6 +1,6 @@
 {
   "name": "@js-joda/core",
-  "version": "4.1.0",
+  "version": "4.1.0-cs1",
   "description": "a date and time library for javascript",
   "repository": {
     "type": "git",
@@ -28,7 +28,8 @@
     "build-dist": "npx rollup -c rollup.config.js",
     "build-md-toc": "./node_modules/.bin/markdown-toc -i CheatSheet.md",
     "build-gz-check": "gzip -kf dist/js-joda.min.js && ls -alh ./dist/js-joda.min.js*",
-    "lint": "../../node_modules/.bin/eslint  ./src ./test"
+    "lint": "../../node_modules/.bin/eslint  ./src ./test",
+    "export": "npm run build-dist && npm pack && mv js-joda-core-*.tgz ../../../car-manager/shared"
   },
   "keywords": [
     "date",

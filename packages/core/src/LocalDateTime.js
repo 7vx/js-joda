@@ -233,6 +233,8 @@ implements Temporal, TemporalAdjuster, Serializable */ {
         if(arguments.length === 2 && nanoOfSecond instanceof ZoneOffset){
             offset = nanoOfSecond;
             nanoOfSecond = 0;
+        } else if (arguments.length === 2 && nanoOfSecond instanceof ZoneId) {
+            return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), nanoOfSecond)
         }
         requireNonNull(offset, 'offset');
         const localSecond = epochSecond + offset.totalSeconds();  // overflow caught later
