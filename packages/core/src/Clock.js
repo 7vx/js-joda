@@ -207,7 +207,7 @@ class SystemClock extends Clock {
      * @returns {number}
      */
     millis() {
-        return new Date().getTime();
+        return Math.trunc(Date.now() / 1000) * 1000;
     }
 
     /**
@@ -215,7 +215,10 @@ class SystemClock extends Clock {
      * @returns {Instant}
      */
     instant() {
-        return Instant.ofEpochMilli(this.millis());
+        // * We never produce millisecond part. This should yield better performance on the client, because Instant is decomposed
+        // into second and nano part.
+        // * At least ceil in joda-ext would need to be fixed if this was not the case
+        return Instant.ofEpochSecond(Math.trunc(Date.now() / 1000));
     }
     
     equals(obj) {    

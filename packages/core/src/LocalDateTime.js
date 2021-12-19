@@ -230,6 +230,9 @@ implements Temporal, TemporalAdjuster, Serializable */ {
      * @throws {DateTimeException} if the result exceeds the supported range
      */
     static ofEpochSecond(epochSecond=0, nanoOfSecond=0, offset) {
+        if(arguments.length === 2 && nanoOfSecond instanceof ZoneId){
+            return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSecond), nanoOfSecond)
+        }
         if(arguments.length === 2 && nanoOfSecond instanceof ZoneOffset){
             offset = nanoOfSecond;
             nanoOfSecond = 0;

@@ -1,6 +1,6 @@
 {
-  "name": "@js-joda/core",
-  "version": "5.2.0",
+  "name": "@carsync/js-joda-core",
+  "version": "5.2.1",
   "description": "a date and time library for javascript",
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "build-dist": "npx rollup -c rollup.config.js",
     "build-md-toc": "npx markdown-toc -i CheatSheet.md",
     "build-gz-check": "gzip -kf dist/js-joda.min.js && ls -alh ./dist/js-joda.min.js*",
+    "export": "npm run build-dist && npm pack && mv js-joda-core-4.3.1-*.tgz ../../../car-manager/shared",
     "lint": "npx eslint  ."
   },
   "keywords": [

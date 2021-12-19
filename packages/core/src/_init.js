@@ -29,6 +29,8 @@ import { _init as DateTimeFormatterBuilderInit } from './format/DateTimeFormatte
 import { _init as TemporalQueriesInit } from './temporal/TemporalQueriesFactory';
 import { _init as ZoneIdInit } from './ZoneIdFactory';
 
+import { initCustom } from './custom'
+
 let isInit = false;
 
 function init() {
@@ -63,6 +65,8 @@ function init() {
     DateTimeFormatterBuilderInit();
     OffsetDateTimeInit();
     OffsetTimeInit();
+
+    initCustom();
 }
 
 init();

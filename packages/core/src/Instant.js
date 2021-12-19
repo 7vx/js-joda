@@ -150,10 +150,15 @@ export class Instant extends Temporal {
      * @return {Instant} an instant, not null
      * @throws DateTimeException if the instant exceeds the maximum or minimum instant
      */
-    static ofEpochSecond(epochSecond, nanoAdjustment=0){
-        const secs = epochSecond + MathUtil.floorDiv(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
-        const nos = MathUtil.floorMod(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
-        return Instant._create(secs, nos);
+    static ofEpochSecond(epochSecond, nanoAdjustment){
+        if (nanoAdjustment == null) {
+            // Fastpath
+            return Instant._create(epochSecond, 0);
+        } else {
+            const secs = epochSecond + MathUtil.floorDiv(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
+            const nos = MathUtil.floorMod(nanoAdjustment, LocalTime.NANOS_PER_SECOND);
+            return Instant._create(secs, nos);
+        }
     }
 
     /**

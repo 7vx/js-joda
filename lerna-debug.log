@@ -1,0 +1,8 @@
+96 warn complete Waiting for 2 child processes to exit. CTRL-C to exit immediately.
+97 error Error: Command failed with exit code 128: git tag @js-joda/core@5.3.0 -m @js-joda/core@5.3.0
+97 error fatal: tag '@js-joda/core@5.3.0' already exists
+97 error     at makeError (/Users/alamothe/projects/js-joda/node_modules/@lerna/child-process/node_modules/execa/lib/error.js:60:11)
+97 error     at handlePromise (/Users/alamothe/projects/js-joda/node_modules/@lerna/child-process/node_modules/execa/index.js:118:26)
+97 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
+97 error     at async Promise.all (index 0)
+97 error     at async Promise.all (index 0)
