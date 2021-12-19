@@ -155,11 +155,27 @@ const jsJodaExports = {
 const use = bindUse(jsJodaExports);
 jsJodaExports.use = use;
 
+function maxOf(...args) {
+    if (args.length === 0) {
+        return undefined
+    }
+    return args.reduce((prev, curr) => prev.compareTo(curr) >= 0 ? prev : curr)
+}
+
+function minOf(...args) {
+    if (args.length === 0) {
+        return undefined
+    }
+    return args.reduce((prev, curr) => prev.compareTo(curr) <= 0 ? prev : curr)
+}
+
 export {
     _,
     use,
     convert,
     nativeJs,
+    maxOf,
+    minOf,
     ArithmeticException,
     DateTimeException,
     DateTimeParseException,
