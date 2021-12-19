@@ -11,31 +11,31 @@
  * The most commonly used units are defined in `ChronoField`. Further fields are supplied in
  * `IsoFields`. Fields can also be written by application code by implementing this interface.
  */
-export abstract class TemporalField {
+export interface TemporalField {
     /** Checks if this field is supported by the temporal object. */
-    abstract isSupportedBy(temporal: TemporalAccessor): boolean;
+    isSupportedBy(temporal: TemporalAccessor): boolean;
     /** Checks if this field represents a component of a date. */
-    abstract isDateBased(): boolean;
+    isDateBased(): boolean;
     /** Checks if this field represents a component of a time. */
-    abstract isTimeBased(): boolean;
+    isTimeBased(): boolean;
     /** Gets the unit that the field is measured in. */
-    abstract baseUnit(): TemporalUnit;
+    baseUnit(): TemporalUnit;
     /** Gets the range that the field is bound by. */
-    abstract rangeUnit(): TemporalUnit;
+    rangeUnit(): TemporalUnit;
     /** Gets the range of valid values for the field. */
-    abstract range(): ValueRange;
+    range(): ValueRange;
     /**
      * Get the range of valid values for this field using the temporal object to
      * refine the result.
      */
-    abstract rangeRefinedBy(temporal: TemporalAccessor): ValueRange;
+    rangeRefinedBy(temporal: TemporalAccessor): ValueRange;
     /** Gets the value of this field from the specified temporal object. */
-    abstract getFrom(temporal: TemporalAccessor): number;
+    getFrom(temporal: TemporalAccessor): number;
     /** Returns a copy of the specified temporal object with the value of this field set. */
-    abstract adjustInto<R extends Temporal>(temporal: R, newValue: number): R;
-    abstract name(): string;
-    abstract displayName(/* TODO: locale */): string;
-    abstract equals(other: any): boolean;
+    adjustInto<R extends Temporal>(temporal: R, newValue: number): R;
+    name(): string;
+    displayName(/* TODO: locale */): string;
+    equals(other: any): boolean;
 }
 
 /**
@@ -50,26 +50,30 @@ export abstract class TemporalField {
  * The most commonly used units are defined in `ChronoUnit`. Further units are supplied in
  * `IsoFields`. Units can also be written by application code by implementing this interface.
  */
-export abstract class TemporalUnit {
+export interface TemporalUnit {
     /** Returns a copy of the specified temporal object with the specified period added. */
-    abstract addTo<T extends Temporal>(temporal: T, amount: number): T;
+    addTo<T extends Temporal>(temporal: T, amount: number): T;
     /**
      * Calculates the period in terms of this unit between two temporal objects of the same type.
      *
      * Returns the period between temporal1 and temporal2 in terms of this unit; a positive number
      * if `temporal2` is later than `temporal1`, negative if earlier.
      */
-    abstract between(temporal1: Temporal, temporal2: Temporal): number;
+    between(temporal1: Temporal, temporal2: Temporal): number;
     /** Gets the duration of this unit, which may be an estimate. */
-    abstract duration(): Duration;
+    duration(): Duration;
     /** Checks if this unit is date-based. */
-    abstract isDateBased(): boolean;
+    isDateBased(): boolean;
     /** Checks if the duration of the unit is an estimate. */
-    abstract isDurationEstimated(): boolean;
+    isDurationEstimated(): boolean;
     /** Checks if this unit is supported by the specified temporal object. */
-    abstract isSupportedBy(temporal: Temporal): boolean;
+    isSupportedBy(temporal: Temporal): boolean;
     /** Checks if this unit is time-based. */
-    abstract isTimeBased(): boolean;
+    isTimeBased(): boolean;
+}
+
+interface Prototype<T> {
+    readonly prototype: T
 }
 
 /**
@@ -85,13 +89,15 @@ export abstract class TemporalUnit {
  *
  * Instances of this class are not tied to a specific field.
  */
-export class ValueRange {
-    static of(min: number, max: number): ValueRange;
-    static of(min: number, maxSmallest: number, maxLargest: number): ValueRange;
-    static of(minSmallest: number, minLargest: number, maxSmallest: number, maxLargest: number): ValueRange;
+export const ValueRange: ValueRangeConstructor
 
-    private constructor();
+export interface ValueRangeConstructor extends Prototype<ValueRange> {
+    of(min: number, max: number): ValueRange;
+    of(min: number, maxSmallest: number, maxLargest: number): ValueRange;
+    of(minSmallest: number, minLargest: number, maxSmallest: number, maxLargest: number): ValueRange;
+}
 
+export interface ValueRange {
     checkValidValue(value: number, field: TemporalField): number;
     checkValidIntValue(value: number, field: TemporalField): number;
     equals(other: any): boolean;
@@ -128,7 +134,7 @@ export class ValueRange {
  * Instead, applications should create and pass around instances of concrete types, such as
  * `Period` and `Duration`.
  */
-export abstract class TemporalAmount {
+export interface TemporalAmount {
     /**
      * This adds to the specified temporal object using the logic encapsulated in the
      * implementing class.
@@ -145,11 +151,11 @@ export abstract class TemporalAmount {
      * It is recommended to use the second approach, `plus(TemporalAmount)`, as it is a lot
      * clearer to read in code.
      */
-    abstract addTo<T extends Temporal>(temporal: T): T;
+    addTo<T extends Temporal>(temporal: T): T;
     /** Gets the amount associated with the specified unit. */
-    abstract get(unit: TemporalUnit): number;
+    get(unit: TemporalUnit): number;
     /** Gets the list of units, from largest to smallest, that fully define this amount. */
-    abstract units(): TemporalUnit[];
+    units(): TemporalUnit[];
     /**
      * This substract to the specified temporal object using the logic encapsulated in the
      * implementing class.
@@ -165,7 +171,7 @@ export abstract class TemporalAmount {
      * It is recommended to use the second approach, `minus(TemporalAmount)`, as it is a lot
      * clearer to read in code.
      */
-    abstract subtractFrom<T extends Temporal>(temporal: T): T;
+    subtractFrom<T extends Temporal>(temporal: T): T;
 }
 
 /**
@@ -193,7 +199,7 @@ export abstract class TemporalAmount {
  * interface may be in calendar systems other than ISO. See `ChronoLocalDate` for a fuller
  * discussion of the issues.
  */
-export abstract class TemporalAccessor {
+export interface TemporalAccessor {
     /**
      * Gets the value of the specified field as an integer number.
      *
@@ -231,14 +237,14 @@ export abstract class TemporalAccessor {
      * range that are invalid for the field.
      */
     range(field: TemporalField): ValueRange;
-    abstract getLong(field: TemporalField): number;
+    getLong(field: TemporalField): number;
     /**
      * Checks if the specified field is supported.
      *
      * This checks if the date-time can be queried for the specified field. If false, then
      * calling the `range` and `get` methods will throw an exception.
      */
-    abstract isSupported(field: TemporalField): boolean;
+    isSupported(field: TemporalField): boolean;
 }
 
 /**
@@ -265,7 +271,7 @@ export abstract class TemporalAccessor {
  * interface may be in calendar systems other than ISO. See `ChronoLocalDate` for a fuller
  * discussion of the issues.
  */
-export abstract class Temporal extends TemporalAccessor {
+export interface Temporal extends TemporalAccessor {
     minus(amountToSubtract: number, unit: TemporalUnit): Temporal;
     /**
      * Returns an object of the same type as this object with an amount subtracted.
@@ -335,14 +341,14 @@ export abstract class Temporal extends TemporalAccessor {
      */
     with(field: TemporalField, newValue: number): Temporal;
 
-    abstract isSupported(field: TemporalField): boolean;
+    isSupported(field: TemporalField): boolean;
     /**
      * Checks if the specified unit is supported.
      *
      * This checks if the date-time can be queried for the specified unit. If false, then calling
      * the plus and minus methods will throw an exception.
      */
-    abstract isSupported(unit: TemporalUnit): boolean;
+    isSupported(unit: TemporalUnit): boolean;
 
     /**
      * Calculates the period between this temporal and another temporal in terms of the
@@ -374,15 +380,7 @@ export abstract class Temporal extends TemporalAccessor {
      * const daysBetween = start.until(end, DAYS);
      * ```
      */
-    abstract until(endTemporal: Temporal, unit: TemporalUnit): number;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): Temporal;
-    protected _minusAmount(amount: TemporalAmount): Temporal;
-    protected _plusAmount(amount: TemporalAmount): Temporal;
-    protected _withAdjuster(adjuster: TemporalAdjuster): Temporal;
-
-    protected abstract _plusUnit(amountToAdd: number, unit: TemporalUnit): Temporal;
-    protected abstract _withField(field: TemporalField, newValue: number): Temporal;
+    until(endTemporal: Temporal, unit: TemporalUnit): number;
 }
 
 /**
@@ -408,12 +406,12 @@ export abstract class Temporal extends TemporalAccessor {
  * See `TemporalAdjusters` for a standard set of adjusters, including finding the last day of
  * the month. Adjusters may also be defined by applications.
  */
-export abstract class TemporalAdjuster {
-    abstract adjustInto(temporal: Temporal): Temporal;
+export interface TemporalAdjuster {
+    adjustInto(temporal: Temporal): Temporal;
 }
 
-export abstract class TemporalQuery<R> {
-    abstract queryFrom(temporal: TemporalAccessor): R;
+export interface TemporalQuery<R> {
+    queryFrom(temporal: TemporalAccessor): R;
 }
 
 /**
@@ -422,70 +420,73 @@ export abstract class TemporalQuery<R> {
  * This set of fields provide field-based access to manipulate a date, time or date-time.
  * The standard set of fields can be extended by implementing {@link TemporalField}.
  */
-export class ChronoField extends TemporalField {
+
+export const ChronoField: ChronoFieldConstructor
+
+export interface ChronoFieldConstructor extends Prototype<ChronoField> {
     /**
      * This represents concept of the count of
      * days within the period of a week where the weeks are aligned to the start of the month.
      * This field is typically used with `ALIGNED_WEEK_OF_MONTH`.
      */
-    static ALIGNED_DAY_OF_WEEK_IN_MONTH: ChronoField;
+    ALIGNED_DAY_OF_WEEK_IN_MONTH: ChronoField;
     /**
      * This represents concept of the count of days
      * within the period of a week where the weeks are aligned to the start of the year.
      * This field is typically used with `ALIGNED_WEEK_OF_YEAR`.
      */
-    static ALIGNED_DAY_OF_WEEK_IN_YEAR: ChronoField;
+    ALIGNED_DAY_OF_WEEK_IN_YEAR: ChronoField;
     /**
      * This represents concept of the count of weeks within
      * the period of a month where the weeks are aligned to the start of the month. This field
      * is typically used with `ALIGNED_DAY_OF_WEEK_IN_MONTH`.
      */
-    static ALIGNED_WEEK_OF_MONTH: ChronoField;
+    ALIGNED_WEEK_OF_MONTH: ChronoField;
     /**
      * his represents concept of the count of weeks within
      * the period of a year where the weeks are aligned to the start of the year. This field
      * is typically used with `ALIGNED_DAY_OF_WEEK_IN_YEAR`.
      */
-    static ALIGNED_WEEK_OF_YEAR: ChronoField;
+    ALIGNED_WEEK_OF_YEAR: ChronoField;
     /**
      * This counts the AM/PM within the day, from 0 (AM) to 1 (PM).
      */
-    static AMPM_OF_DAY: ChronoField;
+    AMPM_OF_DAY: ChronoField;
     /**
      * This counts the hour within the AM/PM, from 1 to 12.
      * This is the hour that would be observed on a standard 12-hour analog wall clock.
      */
-    static CLOCK_HOUR_OF_AMPM: ChronoField;
+    CLOCK_HOUR_OF_AMPM: ChronoField;
     /**
      * This counts the hour within the AM/PM, from 1 to 24.
      * This is the hour that would be observed on a 24-hour analog wall clock.
      */
-    static CLOCK_HOUR_OF_DAY: ChronoField;
+    CLOCK_HOUR_OF_DAY: ChronoField;
     /**
      * This represents the concept of the day within the month.
      * In the default ISO calendar system, this has values from 1 to 31 in most months.
      * April, June, September, November have days from 1 to 30, while February has days from
      * 1 to 28, or 29 in a leap year.
      */
-    static DAY_OF_MONTH: ChronoField;
+    DAY_OF_MONTH: ChronoField;
     /**
      * This represents the standard concept of the day of the week.
      * In the default ISO calendar system, this has values from Monday (1) to Sunday (7).
      * The {@link DayOfWeek} class can be used to interpret the result.
      */
-    static DAY_OF_WEEK: ChronoField;
+    DAY_OF_WEEK: ChronoField;
     /**
      * This represents the concept of the day within the year.
      * In the default ISO calendar system, this has values from 1 to 365 in standard years and
      * 1 to 366 in leap years.
      */
-    static DAY_OF_YEAR: ChronoField;
+    DAY_OF_YEAR: ChronoField;
     /**
      * This field is the sequential count of days where
      * 1970-01-01 (ISO) is zero. Note that this uses the local time-line, ignoring offset and
      * time-zone.
      */
-    static EPOCH_DAY: ChronoField;
+    EPOCH_DAY: ChronoField;
     /**
      * This represents the concept of the era, which is the largest
      * division of the time-line. This field is typically used with `YEAR_OF_ERA`.
@@ -494,17 +495,17 @@ export class ChronoField extends TemporalField {
      * 'CE' is the one currently in use and year-of-era runs from 1 to the maximum value.
      * The era 'BCE' is the previous era, and the year-of-era runs backwards.
      */
-    static ERA: ChronoField;
+    ERA: ChronoField;
     /**
      * This counts the hour within the AM/PM, from 0 to 11.
      * This is the hour that would be observed on a standard 12-hour digital clock.
      */
-    static HOUR_OF_AMPM: ChronoField;
+    HOUR_OF_AMPM: ChronoField;
     /**
      * This counts the hour within the day, from 0 to 23. This is
      * the hour that would be observed on a standard 24-hour digital clock.
      */
-    static HOUR_OF_DAY: ChronoField;
+    HOUR_OF_DAY: ChronoField;
     /**
      * This represents the concept of the sequential count of
      * seconds where `1970-01-01T00:00Z` (ISO) is zero. This field may be used with `NANO_OF_DAY`
@@ -515,7 +516,7 @@ export class ChronoField extends TemporalField {
      * or time-zone can the local date or time be found. This field allows the seconds part of
      * the instant to be queried.
      */
-    static INSTANT_SECONDS: ChronoField;
+    INSTANT_SECONDS: ChronoField;
     /**
      * This counts the microsecond within the day, from `0` to
      * `(24 * 60 * 60 * 1_000_000) - 1`.
@@ -527,7 +528,7 @@ export class ChronoField extends TemporalField {
      * When this field is used for setting a value, it should behave in the same way as
      * setting `NANO_OF_DAY` with the value multiplied by 1,000.
      */
-    static MICRO_OF_DAY: ChronoField;
+    MICRO_OF_DAY: ChronoField;
     /**
      * This counts the microsecond within the second, from 0 to 999,999.
      *
@@ -536,7 +537,7 @@ export class ChronoField extends TemporalField {
      * can return a value for `SECOND_OF_MINUTE`, `SECOND_OF_DAY` or `INSTANT_SECONDS` filling
      * unknown precision with zero.
      */
-    static MICRO_OF_SECOND: ChronoField;
+    MICRO_OF_SECOND: ChronoField;
     /**
      * This counts the millisecond within the day, from 0 to
      * `(24 * 60 * 60 * 1,000) - 1`.
@@ -548,7 +549,7 @@ export class ChronoField extends TemporalField {
      * When this field is used for setting a value, it should behave in the same way as
      * setting `NANO_OF_DAY` with the value multiplied by 1,000,000.
      */
-    static MILLI_OF_DAY: ChronoField;
+    MILLI_OF_DAY: ChronoField;
     /**
      * This counts the millisecond within the second, from 0 to
      * 999.
@@ -561,21 +562,21 @@ export class ChronoField extends TemporalField {
      * When this field is used for setting a value, it should behave in the same way as
      * setting `NANO_OF_SECOND` with the value multiplied by 1,000,000.
      */
-    static MILLI_OF_SECOND: ChronoField;
+    MILLI_OF_SECOND: ChronoField;
     /**
      * This counts the minute within the day, from 0 to `(24 * 60) - 1`.
      */
-    static MINUTE_OF_DAY: ChronoField;
+    MINUTE_OF_DAY: ChronoField;
     /**
      * This counts the minute within the hour, from 0 to 59.
      */
-    static MINUTE_OF_HOUR: ChronoField;
+    MINUTE_OF_HOUR: ChronoField;
     /**
      * The month-of-year, such as March. This represents the concept
      * of the month within the year. In the default ISO calendar system, this has values from
      * January (1) to December (12).
      */
-    static MONTH_OF_YEAR: ChronoField;
+    MONTH_OF_YEAR: ChronoField;
     /**
      * This counts the nanosecond within the day, from 0 to
      * `(24 * 60 * 60 * 1,000,000,000) - 1`.
@@ -584,7 +585,7 @@ export class ChronoField extends TemporalField {
      * Implementations of {@link TemporalAccessor} should provide a value for this field if they
      * can return a value for `SECOND_OF_DAY` filling unknown precision with zero.
      */
-    static NANO_OF_DAY: ChronoField;
+    NANO_OF_DAY: ChronoField;
     /**
      * This counts the nanosecond within the second, from 0
      * to 999,999,999.
@@ -599,7 +600,7 @@ export class ChronoField extends TemporalField {
      * {@link TemporalAccessor} stores time to millisecond precision, then the nano-of-second must
      * be divided by 1,000,000 before replacing the milli-of-second.
      */
-    static NANO_OF_SECOND: ChronoField;
+    NANO_OF_SECOND: ChronoField;
     /**
      * This represents the concept of the offset in seconds of
      * local time from UTC/Greenwich.
@@ -609,7 +610,7 @@ export class ChronoField extends TemporalField {
      * the total amount of the offset in seconds. For example, during the winter Paris has an
      * offset of +01:00, which is 3600 seconds.
      */
-    static OFFSET_SECONDS: ChronoField;
+    OFFSET_SECONDS: ChronoField;
     /**
      * The proleptic-month, which counts months sequentially
      * from year 0.
@@ -618,16 +619,16 @@ export class ChronoField extends TemporalField {
      * and decrease for earlier ones. Note that this uses the local time-line, ignoring offset
      * and time-zone.
      */
-    static PROLEPTIC_MONTH: ChronoField;
+    PROLEPTIC_MONTH: ChronoField;
     /**
      * This counts the second within the day, from 0 to
      * (24 * 60 * 60) - 1.
      */
-    static SECOND_OF_DAY: ChronoField;
+    SECOND_OF_DAY: ChronoField;
     /**
      * This counts the second within the minute, from 0 to 59.
      */
-    static SECOND_OF_MINUTE: ChronoField;
+    SECOND_OF_MINUTE: ChronoField;
     /**
      * The proleptic year, such as 2012. This represents the concept of
      * the year, counting sequentially and using negative numbers. The proleptic year is not
@@ -639,7 +640,7 @@ export class ChronoField extends TemporalField {
      * day. These map onto the `ERA`, `YEAR_OF_ERA`, `MONTH_OF_YEAR` and `DAY_OF_MONTH` fields.
      * Whether this field or `YEAR_OF_ERA` is used depends on which mental model is being used.
      */
-    static YEAR: ChronoField;
+    YEAR: ChronoField;
     /**
      * This represents the concept of the year within the era. This
      * field is typically used with `ERA`. The standard mental model for a date is based on three
@@ -663,10 +664,10 @@ export class ChronoField extends TemporalField {
      * ISO eras do not align with the well-known AD/BC eras due to the change between the Julian
      * and Gregorian calendar systems.
      */
-    static YEAR_OF_ERA: ChronoField;
+    YEAR_OF_ERA: ChronoField;
+}
 
-    private constructor();
-
+export interface ChronoField extends TemporalField {
     isSupportedBy(temporal: TemporalAccessor): boolean;
     baseUnit(): TemporalUnit;
     /** Checks that the specified value is valid for this field. */
@@ -689,99 +690,102 @@ export class ChronoField extends TemporalField {
     toString(): string;
 }
 
-/**
- * A standard set of date periods units.
- *
- * This set of units provide unit-based access to manipulate a date, time or date-time.
- * The standard set of units can be extended by implementing TemporalUnit.
- */
-export class ChronoUnit extends TemporalUnit {
+export const ChronoUnit: ChronoUnitConstructor
+
+export interface ChronoUnitConstructor extends Prototype<ChronoUnit> {
     /**
      * Unit that represents the concept of a nanosecond, the smallest supported unit
      * of time. For the ISO calendar system, it is equal to the 1,000,000,000th part of the second unit.
      */
-    static NANOS: ChronoUnit;
+    NANOS: ChronoUnit;
     /**
      * Unit that represents the concept of a microsecond. For the ISO calendar
      * system, it is equal to the 1,000,000th part of the second unit.
      */
-    static MICROS: ChronoUnit;
+    MICROS: ChronoUnit;
     /**
      * Unit that represents the concept of a millisecond. For the ISO calendar
      * system, it is equal to the 1000th part of the second unit.
      */
-    static MILLIS: ChronoUnit;
+    MILLIS: ChronoUnit;
     /**
      * Unit that represents the concept of a second. For the ISO calendar system,
      * it is equal to the second in the SI system of units, except around a leap-second.
      */
-    static SECONDS: ChronoUnit;
+    SECONDS: ChronoUnit;
     /**
      * Unit that represents the concept of a minute. For the ISO calendar system,
      * it is equal to 60 seconds.
      */
-    static MINUTES: ChronoUnit;
+    MINUTES: ChronoUnit;
     /**
      * Unit that represents the concept of an hour. For the ISO calendar system,
      * it is equal to 60 minutes.
      */
-    static HOURS: ChronoUnit;
+    HOURS: ChronoUnit;
     /**
      * Unit that represents the concept of half a day, as used in AM/PM. For
      * the ISO calendar system, it is equal to 12 hours.
      */
-    static HALF_DAYS: ChronoUnit;
+    HALF_DAYS: ChronoUnit;
     /**
      * Unit that represents the concept of a day. For the ISO calendar system, it
      * is the standard day from midnight to midnight. The estimated duration of a day is 24 Hours.
      */
-    static DAYS: ChronoUnit;
+    DAYS: ChronoUnit;
     /**
      * Unit that represents the concept of a week. For the ISO calendar system,
      * it is equal to 7 Days.
      */
-    static WEEKS: ChronoUnit;
+    WEEKS: ChronoUnit;
     /**
      * Unit that represents the concept of a month. For the ISO calendar system,
      * the length of the month varies by month-of-year. The estimated duration of a month is
      * one twelfth of 365.2425 Days.
      */
-    static MONTHS: ChronoUnit;
+    MONTHS: ChronoUnit;
     /**
      * Unit that represents the concept of a year. For the ISO calendar system, it
      * is equal to 12 months. The estimated duration of a year is 365.2425 Days.
      */
-    static YEARS: ChronoUnit;
+    YEARS: ChronoUnit;
     /**
      * Unit that represents the concept of a decade. For the ISO calendar system,
      * it is equal to 10 years.
      */
-    static DECADES: ChronoUnit;
+    DECADES: ChronoUnit;
     /**
      * Unit that represents the concept of a century. For the ISO calendar
      * system, it is equal to 100 years.
      */
-    static CENTURIES: ChronoUnit;
+    CENTURIES: ChronoUnit;
     /**
      * Unit that represents the concept of a millennium. For the ISO calendar
      * system, it is equal to 1,000 years.
      */
-    static MILLENNIA: ChronoUnit;
+    MILLENNIA: ChronoUnit;
     /**
      * Unit that represents the concept of an era. The ISO calendar system doesn't
      * have eras thus it is impossible to add an era to a date or date-time. The estimated duration
      * of the era is artificially defined as 1,000,000,000 Years.
      */
-    static ERAS: ChronoUnit;
+    ERAS: ChronoUnit;
     /**
      * Artificial unit that represents the concept of forever. This is primarily
      * used with {@link TemporalField} to represent unbounded fields such as the year or era. The
      * estimated duration of the era is artificially defined as the largest duration supported by
      * {@link Duration}.
      */
-    static FOREVER: ChronoUnit;
+    FOREVER: ChronoUnit;
+}
 
-    private constructor();
+/**
+ * A standard set of date periods units.
+ *
+ * This set of units provide unit-based access to manipulate a date, time or date-time.
+ * The standard set of units can be extended by implementing TemporalUnit.
+ */
+export interface ChronoUnit extends TemporalUnit, Comparable<ChronoUnit> {
 
     addTo<T extends Temporal>(temporal: T, amount: number): T;
     between(temporal1: Temporal, temporal2: Temporal): number;
@@ -1069,41 +1073,45 @@ export namespace TemporalQueries {
 //   MAIN
 // ----------------------------------------------------------------------------
 
-export abstract class Clock {
-    static fixed(fixedInstant: Instant, zoneId: ZoneId): Clock;
-    static offset(baseClock: Clock, offsetDuration: Duration): Clock;
-    static system(zone: ZoneId): Clock;
-    static systemDefaultZone(): Clock;
-    static systemUTC(): Clock;
+export const Clock: ClockConstructor
 
-    abstract equals(other: any): boolean;
-    abstract instant(): Instant;
-    abstract millis(): number;
-    abstract withZone(zone: ZoneId): Clock;
-    abstract zone(): ZoneId;
+export interface ClockConstructor extends Prototype<Clock> {
+    fixed(fixedInstant: Instant, zoneId: ZoneId): Clock;
+    offset(baseClock: Clock, offsetDuration: Duration): Clock;
+    system(zone: ZoneId): Clock;
+    systemDefaultZone(): Clock;
+    systemUTC(): Clock;
 }
 
-export class Duration extends TemporalAmount {
-    static ZERO: Duration;
+export interface Clock {
+    equals(other: any): boolean;
+    instant(): Instant;
+    millis(): number;
+    withZone(zone: ZoneId): Clock;
+    zone(): ZoneId;
+}
 
-    static between(startInclusive: Temporal, endExclusive: Temporal): Duration;
-    static from(amount: TemporalAmount): Duration;
-    static of(amount: number, unit: TemporalUnit): Duration;
-    static ofDays(days: number): Duration;
-    static ofHours(hours: number): Duration;
-    static ofMillis(millis: number): Duration;
-    static ofMinutes(minutes: number): Duration;
-    static ofNanos(nanos: number): Duration;
-    static ofSeconds(seconds: number, nanoAdjustment?: number): Duration;
-    static parse(text: string): Duration;
+export const Duration: DurationConstructor
 
-    private constructor();
+export interface DurationConstructor extends Prototype<Duration> {
+    ZERO: Duration;
 
+    between(startInclusive: Temporal, endExclusive: Temporal): Duration;
+    from(amount: TemporalAmount): Duration;
+    of(amount: number, unit: TemporalUnit): Duration;
+    ofDays(days: number): Duration;
+    ofHours(hours: number): Duration;
+    ofMillis(millis: number): Duration;
+    ofMinutes(minutes: number): Duration;
+    ofNanos(nanos: number): Duration;
+    ofSeconds(seconds: number, nanoAdjustment?: number): Duration;
+    parse(text: string): Duration;
+}
+
+export interface Duration extends TemporalAmount, Comparable<Duration> {
     abs(): Duration;
     addTo<T extends Temporal>(temporal: T): T;
-    compareTo(otherDuration: Duration): number;
     dividedBy(divisor: number): Duration;
-    equals(other: any): boolean;
     get(unit: TemporalUnit): number;
     isNegative(): boolean;
     isZero(): boolean;
@@ -1141,33 +1149,31 @@ export class Duration extends TemporalAmount {
     withSeconds(seconds: number): Duration;
 }
 
-export class Instant extends Temporal implements TemporalAdjuster {
-    static EPOCH: Instant;
-    static MIN: Instant;
-    static MAX: Instant;
-    static MIN_SECONDS: Instant;
-    static MAX_SECONDS: Instant;
+export const Instant: InstantConstructor
 
-    static FROM: TemporalQuery<Instant>;
+export interface InstantConstructor extends Prototype<Instant> {
+    EPOCH: Instant;
+    MIN: Instant;
+    MAX: Instant;
+    MIN_SECONDS: Instant;
+    MAX_SECONDS: Instant;
 
-    static from(temporal: TemporalAccessor): Instant;
-    static now(clock?: Clock): Instant;
-    static ofEpochMilli(epochMilli: number): Instant;
-    static ofEpochSecond(epochSecond: number, nanoAdjustment?: number): Instant;
-    static parse(text: string): Instant;
+    FROM: TemporalQuery<Instant>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): Instant;
+    now(clock?: Clock): Instant;
+    ofEpochMilli(epochMilli: number): Instant;
+    ofEpochSecond(epochSecond: number): Instant;
+    parse(text: string): Instant;
+}
 
+export interface Instant extends Temporal, TemporalAdjuster, ComparableEx<Instant> {
     adjustInto(temporal: Temporal): Temporal;
     atOffset(offset: ZoneOffset): OffsetDateTime;
     atZone(zone: ZoneId): ZonedDateTime;
-    compareTo(otherInstant: Instant): number;
     epochSecond(): number;
-    equals(other: any): boolean;
     getLong(field: TemporalField): number;
     hashCode(): number;
-    isAfter(otherInstant: Instant): boolean;
-    isBefore(otherInstant: Instant): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     minus(amountToSubtract: number, unit: TemporalUnit): Instant;
     minus(amount: TemporalAmount): Instant;
@@ -1187,48 +1193,58 @@ export class Instant extends Temporal implements TemporalAdjuster {
     until(endExclusive: Temporal, unit: TemporalUnit): number;
     with(adjuster: TemporalAdjuster): Instant;
     with(field: TemporalField, newValue: number): Instant;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): Instant;
-    protected _minusAmount(amount: TemporalAmount): Instant;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): Instant;
-    protected _plusAmount(amount: TemporalAmount): Instant;
-    protected _withAdjuster(adjuster: TemporalAdjuster): Instant;
-    protected _withField(field: TemporalField, newValue: number): Instant;
 }
 
-export class LocalDate extends ChronoLocalDate implements TemporalAdjuster {
-    static MIN: LocalDate;
-    static MAX: LocalDate;
-    static EPOCH_0: LocalDate;
+interface OfEpochSecond<T> {
+    ofEpochSecond(epochSecond: number, zoneId: ZoneId): T
+}
 
-    static FROM: TemporalQuery<LocalDate>;
+export const LocalDate: LocalDateConstructor
 
-    static from(temporal: TemporalAccessor): LocalDate;
-    static now(clockOrZone?: Clock | ZoneId): LocalDate;
-    static of(year: number, month: Month | number, dayOfMonth: number): LocalDate;
-    static ofEpochDay(epochDay: number): LocalDate;
-    static ofInstant(instant: Instant, zoneId?: ZoneId): LocalDate;
-    static ofYearDay(year: number, dayOfYear: number): LocalDate;
-    static parse(text: string, formatter?: DateTimeFormatter): LocalDate;
+export interface LocalDateConstructor extends Prototype<LocalDate>, OfEpochSecond<LocalDate> {
+    MIN: LocalDate;
+    MAX: LocalDate;
+    EPOCH_0: LocalDate;
 
-    private constructor();
+    FROM: TemporalQuery<LocalDate>;
 
+    from(temporal: TemporalAccessor): LocalDate;
+    now(clockOrZone: Clock | ZoneId): LocalDate;
+    of(year: number, month: Month | number, dayOfMonth: number): LocalDate;
+    ofEpochDay(epochDay: number): LocalDate;
+    ofInstant(instant: Instant, zoneId: ZoneId): LocalDate;
+    ofYearDay(year: number, dayOfYear: number): LocalDate;
+    parse(text: string, formatter?: DateTimeFormatter): LocalDate;
+}
+
+export interface Comparable<T> {
+    compareTo(other: T): number;
+    isEqual(other: T): boolean;
+}
+
+export interface ComparableEx<T> extends Comparable<T> {
+    isAfter(other: T): boolean;
+    isBefore(other: T): boolean;
+    isEqualOrAfter(other: T): boolean;
+    isEqualOrBefore(other: T): boolean;
+}
+
+export function maxOf<T extends Comparable<T>>(...args: T[]): T;
+export function minOf<T extends Comparable<T>>(...args: T[]): T;
+
+export interface LocalDate extends ChronoLocalDate, TemporalAdjuster, ComparableEx<LocalDate> {
     atStartOfDay(): LocalDateTime;
     atStartOfDay(zone: ZoneId): ZonedDateTime;
     atTime(hour: number, minute: number, second?: number, nanoOfSecond?: number): LocalDateTime;
     atTime(time: LocalTime): LocalDateTime;
     atTime(time: OffsetTime): OffsetDateTime;
     chronology(): Chronology;
-    compareTo(other: LocalDate): number;
     dayOfMonth(): number;
     dayOfWeek(): DayOfWeek;
     dayOfYear(): number;
     equals(other: any): boolean;
     getLong(field: TemporalField): number;
     hashCode(): number;
-    isAfter(other: LocalDate): boolean;
-    isBefore(other: LocalDate): boolean;
-    isEqual(other: LocalDate): boolean;
     isLeapYear(): boolean;
     isoWeekOfWeekyear(): number;
     isoWeekyear(): number;
@@ -1261,35 +1277,29 @@ export class LocalDate extends ChronoLocalDate implements TemporalAdjuster {
     withMonth(month: Month | number): LocalDate;
     withYear(year: number): LocalDate;
     year(): number;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): LocalDate;
-    protected _minusAmount(amount: TemporalAmount): LocalDate;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): LocalDate;
-    protected _plusAmount(amount: TemporalAmount): LocalDate;
-    protected _withAdjuster(adjuster: TemporalAdjuster): LocalDate;
-    protected _withField(field: TemporalField, newValue: number): LocalDate;
 }
 
-export class LocalDateTime extends ChronoLocalDateTime implements TemporalAdjuster {
-    static MIN: LocalDateTime;
-    static MAX: LocalDateTime;
+export const LocalDateTime: LocalDateTimeConstructor
 
-    static FROM: TemporalQuery<LocalDateTime>;
+export interface LocalDateTimeConstructor extends Prototype<LocalDateTime> {
+    MIN: LocalDateTime;
+    MAX: LocalDateTime;
 
-    static from(temporal: TemporalAccessor): LocalDateTime;
-    static now(clockOrZone?: Clock | ZoneId): LocalDateTime;
-    static of(date: LocalDate, time: LocalTime): LocalDateTime;
-    static of(year: number, month: Month | number, dayOfMonth: number, hour?: number, minute?: number, second?: number, nanoSecond?: number): LocalDateTime;
-    static ofEpochSecond(epochSecond: number, nanoOfSecond: number, offset: ZoneOffset): LocalDateTime;
-    static ofEpochSecond(epochSecond: number, offset: ZoneOffset): LocalDateTime;
-    static ofInstant(instant: Instant, zoneId?: ZoneId): LocalDateTime;
-    static parse(text: string, formatter?: DateTimeFormatter): LocalDateTime;
+    FROM: TemporalQuery<LocalDateTime>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): LocalDateTime;
+    now(clockOrZone: Clock | ZoneId): LocalDateTime;
+    of(date: LocalDate, time: LocalTime): LocalDateTime;
+    of(year: number, month: Month | number, dayOfMonth: number, hour?: number, minute?: number, second?: number, nanoSecond?: number): LocalDateTime;
+    ofEpochSecond(epochSecond: number, nanoOfSecond: number, offset: ZoneOffset): LocalDateTime;
+    ofEpochSecond(epochSecond: number, offset: ZoneOffset): LocalDateTime;
+    ofInstant(instant: Instant, zoneId: ZoneId): LocalDateTime;
+    parse(text: string, formatter?: DateTimeFormatter): LocalDateTime;
+}
 
+export interface LocalDateTime extends ChronoLocalDateTime, TemporalAdjuster, ComparableEx<LocalDateTime> {
     atOffset(offset: ZoneOffset): OffsetDateTime;
     atZone(zone: ZoneId): ZonedDateTime;
-    compareTo(other: LocalDateTime): number;
     dayOfMonth(): number;
     dayOfWeek(): DayOfWeek;
     dayOfYear(): number;
@@ -1298,9 +1308,6 @@ export class LocalDateTime extends ChronoLocalDateTime implements TemporalAdjust
     getLong(field: TemporalField): number;
     hashCode(): number;
     hour(): number;
-    isAfter(other: LocalDateTime): boolean;
-    isBefore(other: LocalDateTime): boolean;
-    isEqual(other: LocalDateTime): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     minus(amountToSubtract: number, unit: TemporalUnit): LocalDateTime;
     minus(amount: TemporalAmount): LocalDateTime;
@@ -1344,56 +1351,47 @@ export class LocalDateTime extends ChronoLocalDateTime implements TemporalAdjust
     withSecond(second: number): LocalDateTime;
     withYear(year: number): LocalDateTime;
     year(): number;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): LocalDateTime;
-    protected _minusAmount(amount: TemporalAmount): LocalDateTime;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): LocalDateTime;
-    protected _plusAmount(amount: TemporalAmount): LocalDateTime;
-    protected _withAdjuster(adjuster: TemporalAdjuster): LocalDateTime;
-    protected _withField(field: TemporalField, newValue: number): LocalDateTime;
 }
 
-export class LocalTime extends Temporal implements TemporalAdjuster {
-    static MIN: LocalTime;
-    static MAX: LocalTime;
-    static MIDNIGHT: LocalTime;
-    static NOON: LocalTime;
-    static HOURS_PER_DAY: number;
-    static MINUTES_PER_HOUR: number;
-    static MINUTES_PER_DAY: number;
-    static SECONDS_PER_MINUTE: number;
-    static SECONDS_PER_HOUR: number;
-    static SECONDS_PER_DAY: number;
-    static MILLIS_PER_DAY: number;
-    static MICROS_PER_DAY: number;
-    static NANOS_PER_SECOND: number;
-    static NANOS_PER_MINUTE: number;
-    static NANOS_PER_HOUR: number;
-    static NANOS_PER_DAY: number;
+export const LocalTime: LocalTimeConstructor
 
-    static FROM: TemporalQuery<LocalTime>;
+export interface LocalTimeConstructor extends Prototype<LocalTime>, OfEpochSecond<LocalTime> {
+    MIN: LocalTime;
+    MAX: LocalTime;
+    MIDNIGHT: LocalTime;
+    NOON: LocalTime;
+    HOURS_PER_DAY: number;
+    MINUTES_PER_HOUR: number;
+    MINUTES_PER_DAY: number;
+    SECONDS_PER_MINUTE: number;
+    SECONDS_PER_HOUR: number;
+    SECONDS_PER_DAY: number;
+    MILLIS_PER_DAY: number;
+    MICROS_PER_DAY: number;
+    NANOS_PER_SECOND: number;
+    NANOS_PER_MINUTE: number;
+    NANOS_PER_HOUR: number;
+    NANOS_PER_DAY: number;
 
-    static from(temporal: TemporalAccessor): LocalTime;
-    static now(clockOrZone?: Clock | ZoneId): LocalTime;
-    static of(hour?: number, minute?: number, second?: number, nanoOfSecond?: number): LocalTime;
-    static ofInstant(instant: Instant, zone?: ZoneId): LocalTime;
-    static ofNanoOfDay(nanoOfDay: number): LocalTime;
-    static ofSecondOfDay(secondOfDay?: number, nanoOfSecond?: number): LocalTime;
-    static parse(text: String, formatter?: DateTimeFormatter): LocalTime;
+    FROM: TemporalQuery<LocalTime>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): LocalTime;
+    now(clockOrZone: Clock | ZoneId): LocalTime;
+    of(hour?: number, minute?: number, second?: number, nanoOfSecond?: number): LocalTime;
+    ofInstant(instant: Instant, zone: ZoneId): LocalTime;
+    ofNanoOfDay(nanoOfDay: number): LocalTime;
+    ofSecondOfDay(secondOfDay?: number, nanoOfSecond?: number): LocalTime;
+    parse(text: String, formatter?: DateTimeFormatter): LocalTime;
+}
 
+export interface LocalTime extends Temporal, TemporalAdjuster, ComparableEx<LocalTime> {
     adjustInto(temporal: Temporal): Temporal;
     atDate(date: LocalDate): LocalDateTime;
     atOffset(offset: ZoneOffset): OffsetTime;
-    compareTo(other: LocalTime): number;
-    equals(other: any): boolean;
     format(formatter: DateTimeFormatter): string;
     getLong(field: ChronoField): number;
     hashCode(): number;
     hour(): number;
-    isAfter(other: LocalTime): boolean;
-    isBefore(other: LocalTime): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     minus(amountToSubtract: number, unit: TemporalUnit): LocalTime;
     minus(amount: TemporalAmount): LocalTime;
@@ -1423,34 +1421,25 @@ export class LocalTime extends Temporal implements TemporalAdjuster {
     withMinute(minute: number): LocalTime;
     withNano(nanoOfSecond: number): LocalTime;
     withSecond(second: number): LocalTime;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): LocalTime;
-    protected _minusAmount(amount: TemporalAmount): LocalTime;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): LocalTime;
-    protected _plusAmount(amount: TemporalAmount): LocalTime;
-    protected _withAdjuster(adjuster: TemporalAdjuster): LocalTime;
-    protected _withField(field: TemporalField, newValue: number): LocalTime;
 }
 
-export class MonthDay extends TemporalAccessor implements TemporalAdjuster {
-    static FROM: TemporalQuery<MonthDay>;
+export const MonthDay: MonthDayConstructor
 
-    static from(temporal: TemporalAccessor): MonthDay;
-    static now(zoneIdOrClock?: ZoneId | Clock): MonthDay;
-    static of(month: Month | number, dayOfMonth: number): MonthDay;
-    static parse(text: string, formatter?: DateTimeFormatter): MonthDay;
+export interface MonthDayConstructor extends Prototype<MonthDay> {
+    FROM: TemporalQuery<MonthDay>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): MonthDay;
+    now(zoneIdOrClock: ZoneId | Clock): MonthDay;
+    of(month: Month | number, dayOfMonth: number): MonthDay;
+    parse(text: string, formatter?: DateTimeFormatter): MonthDay;
+}
 
+export interface MonthDay extends TemporalAccessor, TemporalAdjuster, ComparableEx<MonthDay> {
     adjustInto(temporal: Temporal): Temporal;
     atYear(year: number): LocalDate;
-    compareTo(other: MonthDay): number;
     dayOfMonth(): number;
-    equals(other: any): boolean;
     format(formatter: DateTimeFormatter): string;
     getLong(field: TemporalField): number;
-    isAfter(other: MonthDay): boolean;
-    isBefore(other: MonthDay): boolean;
     isSupported(field: TemporalField): boolean;
     isValidYear(year: number): boolean;
     month(): Month;
@@ -1462,20 +1451,22 @@ export class MonthDay extends TemporalAccessor implements TemporalAdjuster {
     withMonth(month: number): MonthDay;
 }
 
-export class Period extends TemporalAmount {
-    static ZERO: Period;
+export const Period: PeriodConstructor
 
-    static between(startDate: LocalDate, endDate: LocalDate): Period;
-    static from(amount: TemporalAmount): Period;
-    static of(years: number, months: number, days: number): Period;
-    static ofDays(days: number): Period;
-    static ofMonths(months: number): Period;
-    static ofWeeks(weeks: number): Period;
-    static ofYears(years: number): Period;
-    static parse(text: string): Period;
+export interface PeriodConstructor extends Prototype<Period> {
+    ZERO: Period;
 
-    private constructor();
+    between(startDate: LocalDate, endDate: LocalDate): Period;
+    from(amount: TemporalAmount): Period;
+    of(years: number, months: number, days: number): Period;
+    ofDays(days: number): Period;
+    ofMonths(months: number): Period;
+    ofWeeks(weeks: number): Period;
+    ofYears(years: number): Period;
+    parse(text: string): Period;
+}
 
+export interface Period extends TemporalAmount {
     addTo<T extends Temporal>(temporal: T): T;
     chronology(): IsoChronology;
     days(): number;
@@ -1507,29 +1498,27 @@ export class Period extends TemporalAmount {
     years(): number;
 }
 
-export class Year extends Temporal implements TemporalAdjuster {
-    static MIN_VALUE: number;
-    static MAX_VALUE: number;
+export const Year: YearConstructor
 
-    static FROM: TemporalQuery<Year>;
+export interface YearConstructor extends Prototype<Year> {
+    MIN_VALUE: number;
+    MAX_VALUE: number;
 
-    static from(temporal: TemporalAccessor): Year;
-    static isLeap(year: number): boolean;
-    static now(zoneIdOrClock?: ZoneId | Clock): Year;
-    static of(isoYear: number): Year;
-    static parse(text: string, formatter?: DateTimeFormatter): Year;
+    FROM: TemporalQuery<Year>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): Year;
+    isLeap(year: number): boolean;
+    now(zoneIdOrClock: ZoneId | Clock): Year;
+    of(isoYear: number): Year;
+    parse(text: string, formatter?: DateTimeFormatter): Year;
+}
 
+export interface Year extends Temporal, TemporalAdjuster, ComparableEx<Year> {
     adjustInto(temporal: Temporal): Temporal;
     atDay(dayOfYear: number): LocalDate;
     atMonth(month: Month | number): YearMonth;
     atMonthDay(monthDay: MonthDay): LocalDate;
-    compareTo(other: Year): number;
-    equals(other: any): boolean;
     getLong(field: TemporalField): number;
-    isAfter(other: Year): boolean;
-    isBefore(other: Year): boolean;
     isLeap(): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     isValidMonthDay(monthDay: MonthDay): boolean;
@@ -1546,34 +1535,26 @@ export class Year extends Temporal implements TemporalAdjuster {
     value(): number;
     with(adjuster: TemporalAdjuster): Year;
     with(field: TemporalField, newValue: number): Year;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): Year;
-    protected _minusAmount(amount: TemporalAmount): Year;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): Year;
-    protected _plusAmount(amount: TemporalAmount): Year;
-    protected _withAdjuster(adjuster: TemporalAdjuster): Year;
-    protected _withField(field: TemporalField, newValue: number): Year;
 }
 
-export class YearMonth extends Temporal implements TemporalAdjuster {
-    static FROM: TemporalQuery<YearMonth>;
+export const YearMonth: YearMonthConstructor
 
-    static from(temporal: TemporalAccessor): YearMonth;
-    static now(zoneIdOrClock?: ZoneId | Clock): YearMonth;
-    static of(year: number, monthOrNumber: Month | number): YearMonth;
-    static parse(text: string, formatter?: DateTimeFormatter): YearMonth;
+export interface YearMonthConstructor extends Prototype<YearMonth> {
+    FROM: TemporalQuery<YearMonth>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): YearMonth;
+    now(zoneIdOrClock: ZoneId | Clock): YearMonth;
+    of(year: number, monthOrNumber: Month | number): YearMonth;
+    parse(text: string, formatter?: DateTimeFormatter): YearMonth;
+}
 
+export interface YearMonth extends Temporal, TemporalAdjuster, ComparableEx<YearMonth> {
     adjustInto(temporal: Temporal): Temporal;
     atDay(dayOfMonth: number): LocalDate;
     atEndOfMonth(): LocalDate;
-    compareTo(other: YearMonth): number;
     equals(other: any): boolean;
     format(formatter: DateTimeFormatter): string;
     getLong(field: TemporalField): number;
-    isAfter(other: YearMonth): boolean;
-    isBefore(other: YearMonth): boolean;
     isLeapYear(): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     isValidDay(): boolean;
@@ -1596,13 +1577,6 @@ export class YearMonth extends Temporal implements TemporalAdjuster {
     withMonth(month: number): YearMonth;
     withYear(year: number): YearMonth;
     year(): number;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): YearMonth;
-    protected _minusAmount(amount: TemporalAmount): YearMonth;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): YearMonth;
-    protected _plusAmount(amount: TemporalAmount): YearMonth;
-    protected _withAdjuster(adjuster: TemporalAdjuster): YearMonth;
-    protected _withField(field: TemporalField, newValue: number): YearMonth;
 }
 
 /**
@@ -1627,25 +1601,26 @@ export class YearMonth extends Temporal implements TemporalAdjuster {
  * (`==`), identity hash code, or synchronization) on instances of `OffsetDateTime` may have
  * unpredictable results and should be avoided. The `equals` method should be used for comparisons.
  */
-export class OffsetDateTime extends Temporal implements TemporalAdjuster {
-    static MIN: OffsetDateTime;
-    static MAX: OffsetDateTime;
-    static FROM: TemporalQuery<OffsetDateTime>;
+export const OffsetDateTime: OffsetDateTimeConstructor
 
-    static from(temporal: TemporalAccessor): OffsetDateTime
-    static now(clockOrZone?: Clock | ZoneId): OffsetDateTime;
-    static of(dateTime: LocalDateTime, offset: ZoneOffset): OffsetDateTime;
-    static of(date: LocalDate, time: LocalTime, offset: ZoneOffset): OffsetDateTime;
-    static of(year: number, month: number, day: number, hour: number, minute: number, second: number, nanoOfSecond: number, offset: ZoneOffset): OffsetDateTime;
-    static ofInstant(instant: Instant, zone: ZoneId): OffsetDateTime;
-    static parse(text: string, formatter?: DateTimeFormatter): OffsetDateTime;
+export interface OffsetDateTimeConstructor extends Prototype<OffsetDateTime> {
+    MIN: OffsetDateTime;
+    MAX: OffsetDateTime;
+    FROM: TemporalQuery<OffsetDateTime>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): OffsetDateTime
+    now(clockOrZone: Clock | ZoneId): OffsetDateTime;
+    of(dateTime: LocalDateTime, offset: ZoneOffset): OffsetDateTime;
+    of(date: LocalDate, time: LocalTime, offset: ZoneOffset): OffsetDateTime;
+    of(year: number, month: number, day: number, hour: number, minute: number, second: number, nanoOfSecond: number, offset: ZoneOffset): OffsetDateTime;
+    ofInstant(instant: Instant, zone: ZoneId): OffsetDateTime;
+    parse(text: string, formatter?: DateTimeFormatter): OffsetDateTime;
+}
 
+export interface OffsetDateTime extends Temporal, TemporalAdjuster, ComparableEx<OffsetDateTime> {
     adjustInto(temporal: Temporal): Temporal;
     atZoneSameInstant(zone: ZoneId): ZonedDateTime;
     atZoneSimilarLocal(zone: ZoneId): ZonedDateTime;
-    compareTo(other: OffsetDateTime): number;
     dayOfMonth(): number;
     dayOfWeek(): DayOfWeek;
     dayOfYear(): number;
@@ -1654,9 +1629,6 @@ export class OffsetDateTime extends Temporal implements TemporalAdjuster {
     getLong(field: TemporalField): number;
     hashCode(): number;
     hour(): number;
-    isAfter(other: OffsetDateTime): boolean;
-    isBefore(other: OffsetDateTime): boolean;
-    isEqual(other: OffsetDateTime): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     minus(amountToSubtract: number, unit: TemporalUnit): OffsetDateTime;
     minus(amount: TemporalAmount): OffsetDateTime;
@@ -1707,13 +1679,6 @@ export class OffsetDateTime extends Temporal implements TemporalAdjuster {
     withSecond(second: number): OffsetDateTime;
     withYear(year: number): OffsetDateTime;
     year(): number;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): OffsetDateTime;
-    protected _minusAmount(amount: TemporalAmount): OffsetDateTime;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): OffsetDateTime;
-    protected _plusAmount(amount: TemporalAmount): OffsetDateTime;
-    protected _withAdjuster(adjuster: TemporalAdjuster): OffsetDateTime;
-    protected _withField(field: TemporalField, newValue: number): OffsetDateTime;
 }
 
 /**
@@ -1728,31 +1693,28 @@ export class OffsetDateTime extends Temporal implements TemporalAdjuster {
  * (`==`), identity hash code, or synchronization) on instances of `OffsetTime` may have
  * unpredictable results and should be avoided. The `equals` method should be used for comparisons.
  */
-export class OffsetTime extends Temporal implements TemporalAdjuster {
-    static MIN: OffsetTime;
-    static MAX: OffsetTime;
-    static FROM: TemporalQuery<OffsetTime>;
+export const OffsetTime: OffsetTimeConstructor
 
-    static from(temporal: TemporalAccessor): OffsetTime
-    static now(clockOrZone?: Clock | ZoneId): OffsetTime;
-    static of(time: LocalTime, offset: ZoneOffset): OffsetTime;
-    static of(hour: number, minute: number, second: number, nanoOfSecond: number, offset: ZoneOffset): OffsetTime;
-    static ofInstant(instant: Instant, zone: ZoneId): OffsetTime;
-    static parse(text: string, formatter?: DateTimeFormatter): OffsetTime;
+export interface OffsetTimeConstructor extends Prototype<OffsetTime> {
+    MIN: OffsetTime;
+    MAX: OffsetTime;
+    FROM: TemporalQuery<OffsetTime>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): OffsetTime
+    now(clockOrZone: Clock | ZoneId): OffsetTime;
+    of(time: LocalTime, offset: ZoneOffset): OffsetTime;
+    of(hour: number, minute: number, second: number, nanoOfSecond: number, offset: ZoneOffset): OffsetTime;
+    ofInstant(instant: Instant, zone: ZoneId): OffsetTime;
+    parse(text: string, formatter?: DateTimeFormatter): OffsetTime;
+}
 
+export interface OffsetTime extends Temporal, TemporalAdjuster, ComparableEx<OffsetTime> {
     adjustInto(temporal: Temporal): Temporal;
     atDate(date: LocalDate): OffsetDateTime;
-    compareTo(other: OffsetTime): number;
-    equals(other: any): boolean;
     format(formatter: DateTimeFormatter): string;
     getLong(field: TemporalField): number;
     hashCode(): number;
     hour(): number;
-    isAfter(other: OffsetTime): boolean;
-    isBefore(other: OffsetTime): boolean;
-    isEqual(other: OffsetTime): boolean;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
     minus(amountToSubtract: number, unit: TemporalUnit): OffsetTime;
     minus(amount: TemporalAmount): OffsetTime;
@@ -1783,13 +1745,6 @@ export class OffsetTime extends Temporal implements TemporalAdjuster {
     withOffsetSameInstant(offset: ZoneOffset): OffsetTime;
     withOffsetSameLocal(offset: ZoneOffset): OffsetTime;
     withSecond(second: number): OffsetTime;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): OffsetTime;
-    protected _minusAmount(amount: TemporalAmount): OffsetTime;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): OffsetTime;
-    protected _plusAmount(amount: TemporalAmount): OffsetTime;
-    protected _withAdjuster(adjuster: TemporalAdjuster): OffsetTime;
-    protected _withField(field: TemporalField, newValue: number): OffsetTime;
 }
 
 /**
@@ -1831,14 +1786,16 @@ export class OffsetTime extends Temporal implements TemporalAdjuster {
  * additional methods, `withEarlierOffsetAtOverlap()` and `withLaterOffsetAtOverlap()`, help
  * manage the case of an overlap.
  */
-export class ZonedDateTime extends ChronoZonedDateTime {
-    static FROM: TemporalQuery<ZonedDateTime>;
+export const ZonedDateTime: ZonedDateTimeConstructor
 
-    static from(temporal: TemporalAccessor): ZonedDateTime;
-    static now(clockOrZone?: Clock | ZoneId): ZonedDateTime;
-    static of(localDateTime: LocalDateTime, zone: ZoneId): ZonedDateTime;
-    static of(date: LocalDate, time: LocalTime, zone: ZoneId): ZonedDateTime;
-    static of(year: number, month: number, dayOfMonth: number, hour: number, minute: number, second: number, nanoOfSecond: number, zone: ZoneId): ZonedDateTime;
+export interface ZonedDateTimeConstructor extends Prototype<ZonedDateTime>, OfEpochSecond<ZonedDateTime> {
+    FROM: TemporalQuery<ZonedDateTime>;
+
+    from(temporal: TemporalAccessor): ZonedDateTime;
+    now(clockOrZone: Clock | ZoneId): ZonedDateTime;
+    of(localDateTime: LocalDateTime, zone: ZoneId): ZonedDateTime;
+    of(date: LocalDate, time: LocalTime, zone: ZoneId): ZonedDateTime;
+    of(year: number, month: number, dayOfMonth: number, hour: number, minute: number, second: number, nanoOfSecond: number, zone: ZoneId): ZonedDateTime;
     /**
      * Obtains an instance of ZonedDateTime from an Instant.
      *
@@ -1848,7 +1805,7 @@ export class ZonedDateTime extends ChronoZonedDateTime {
      * Converting an instant to a zoned date-time is simple as there is only one valid offset for
      * each instant.
      */
-    static ofInstant(instant: Instant, zone: ZoneId): ZonedDateTime;
+    ofInstant(instant: Instant, zone: ZoneId): ZonedDateTime;
     /**
      * Obtains an instance of `ZonedDateTime` from the instant formed by combining the local
      * date-time and offset.
@@ -1863,7 +1820,7 @@ export class ZonedDateTime extends ChronoZonedDateTime {
      * If the `ZoneId` to be used is a `ZoneOffset`, this method is equivalent to
      * `of(LocalDateTime, ZoneId)`.
      */
-    static ofInstant(localDateTime: LocalDateTime, offset: ZoneOffset, zone: ZoneId): ZonedDateTime;
+    ofInstant(localDateTime: LocalDateTime, offset: ZoneOffset, zone: ZoneId): ZonedDateTime;
     /**
      * Obtains an instance of `ZonedDateTime` from a local date-time using the preferred offset
      * if possible.
@@ -1882,7 +1839,7 @@ export class ZonedDateTime extends ChronoZonedDateTime {
      * daylight savings change, the local date-time will be moved one hour later into the offset
      * typically corresponding to "summer".
      */
-    static ofLocal(localDateTime: LocalDateTime, zone: ZoneId, preferredOffset?: ZoneOffset | null): ZonedDateTime;
+    ofLocal(localDateTime: LocalDateTime, zone: ZoneId, preferredOffset?: ZoneOffset | null): ZonedDateTime;
     /**
      * Obtains an instance of `ZonedDateTime` strictly validating the combination of local
      * date-time, offset and zone ID.
@@ -1891,11 +1848,11 @@ export class ZonedDateTime extends ChronoZonedDateTime {
      * according to the rules of the specified zone. If the offset is invalid, an exception is
      * thrown.
      */
-    static ofStrict(localDateTime: LocalDateTime, offset: ZoneOffset, zone: ZoneId): ZonedDateTime;
-    static parse(text: string, formatter?: DateTimeFormatter): ZonedDateTime;
+    ofStrict(localDateTime: LocalDateTime, offset: ZoneOffset, zone: ZoneId): ZonedDateTime;
+    parse(text: string, formatter?: DateTimeFormatter): ZonedDateTime;
+}
 
-    private constructor();
-
+export interface ZonedDateTime extends ChronoZonedDateTime {
     dayOfMonth(): number;
     dayOfWeek(): DayOfWeek;
     dayOfYear(): number;
@@ -2010,53 +1967,50 @@ export class ZonedDateTime extends ChronoZonedDateTime {
     withZoneSameLocal(zone: ZoneId): ZonedDateTime;
     year(): number;
     zone(): ZoneId;
-
-    protected _minusUnit(amountToSubtract: number, unit: TemporalUnit): ZonedDateTime;
-    protected _minusAmount(amount: TemporalAmount): ZonedDateTime;
-    protected _plusUnit(amountToAdd: number, unit: TemporalUnit): ZonedDateTime;
-    protected _plusAmount(amount: TemporalAmount): ZonedDateTime;
-    protected _withAdjuster(adjuster: TemporalAdjuster): ZonedDateTime;
-    protected _withField(field: TemporalField, newValue: number): ZonedDateTime;
 }
 
-export abstract class ZoneId {
-    static SYSTEM: ZoneId;
-    static UTC: ZoneId;
+export const ZoneId: ZoneIdConstructor
 
-    static systemDefault(): ZoneId;
-    static of(zoneId: string): ZoneId;
-    static ofOffset(prefix: string, offset: ZoneOffset): ZoneId;
-    static from(temporal: TemporalAccessor): ZoneId;
+export interface ZoneIdConstructor extends Prototype<ZoneId> {
+    SYSTEM: ZoneId;
+    UTC: ZoneId;
 
-    static getAvailableZoneIds(): string[];
+    systemDefault(): ZoneId;
+    of(zoneId: string): ZoneId;
+    ofOffset(prefix: string, offset: ZoneOffset): ZoneId;
+    from(temporal: TemporalAccessor): ZoneId;
 
+    getAvailableZoneIds(): string[];
+}
+
+export interface ZoneId {
     equals(other: any): boolean;
     hashCode(): number;
-    abstract id(): string;
+    id(): string;
     normalized(): ZoneId;
-    abstract rules(): ZoneRules;
+    rules(): ZoneRules;
     toJSON(): string;
     toString(): string;
 }
 
-export class ZoneOffset extends ZoneId implements TemporalAdjuster {
-    static MAX_SECONDS: ZoneOffset;
-    static UTC: ZoneOffset;
-    static MIN: ZoneOffset;
-    static MAX: ZoneOffset;
+export const ZoneOffset: ZoneOffsetConstructor
 
-    static of(offsetId: string): ZoneOffset;
-    static ofHours(hours: number): ZoneOffset;
-    static ofHoursMinutes(hours: number, minutes: number): ZoneOffset;
-    static ofHoursMinutesSeconds(hours: number, minutes: number, seconds: number): ZoneOffset;
-    static ofTotalMinutes(totalMinutes: number): ZoneOffset;
-    static ofTotalSeconds(totalSeconds: number): ZoneOffset;
+export interface ZoneOffsetConstructor extends Prototype<ZoneOffset> {
+    MAX_SECONDS: ZoneOffset;
+    UTC: ZoneOffset;
+    MIN: ZoneOffset;
+    MAX: ZoneOffset;
 
-    private constructor();
+    of(offsetId: string): ZoneOffset;
+    ofHours(hours: number): ZoneOffset;
+    ofHoursMinutes(hours: number, minutes: number): ZoneOffset;
+    ofHoursMinutesSeconds(hours: number, minutes: number, seconds: number): ZoneOffset;
+    ofTotalMinutes(totalMinutes: number): ZoneOffset;
+    ofTotalSeconds(totalSeconds: number): ZoneOffset;
+}
 
+export interface ZoneOffset extends ZoneId, TemporalAdjuster, Comparable<ZoneOffset> {
     adjustInto(temporal: Temporal): Temporal;
-    compareTo(other: ZoneOffset): number;
-    equals(other: any): boolean;
     get(field: TemporalField): number;
     getLong(field: TemporalField): number;
     hashCode(): number;
@@ -2066,36 +2020,38 @@ export class ZoneOffset extends ZoneId implements TemporalAdjuster {
     totalSeconds(): number;
 }
 
-export class ZoneRegion extends ZoneId {
-    static ofId(zoneId: string): ZoneId;
+export const ZoneRegion: ZoneRegionConstructor
 
-    private constructor();
+export interface ZoneRegionConstructor extends Prototype<ZoneRegion> {
+    ofId(zoneId: string): ZoneId;
+}
 
+export interface ZoneRegion extends ZoneId {
     id(): string;
     rules(): ZoneRules;
 }
 
-export class DayOfWeek extends TemporalAccessor implements TemporalAdjuster {
-    static MONDAY: DayOfWeek;
-    static TUESDAY: DayOfWeek;
-    static WEDNESDAY: DayOfWeek;
-    static THURSDAY: DayOfWeek;
-    static FRIDAY: DayOfWeek;
-    static SATURDAY: DayOfWeek;
-    static SUNDAY: DayOfWeek;
+export const DayOfWeek: DayOfWeekConstructor
 
-    static FROM: TemporalQuery<DayOfWeek>;
+export interface DayOfWeekConstructor extends Prototype<DayOfWeek> {
+    MONDAY: DayOfWeek;
+    TUESDAY: DayOfWeek;
+    WEDNESDAY: DayOfWeek;
+    THURSDAY: DayOfWeek;
+    FRIDAY: DayOfWeek;
+    SATURDAY: DayOfWeek;
+    SUNDAY: DayOfWeek;
 
-    static from(temporal: TemporalAccessor): DayOfWeek;
-    static of(dayOfWeek: number): DayOfWeek;
-    static valueOf(name: string): DayOfWeek;
-    static values(): DayOfWeek[];
+    FROM: TemporalQuery<DayOfWeek>;
 
-    private constructor();
+    from(temporal: TemporalAccessor): DayOfWeek;
+    of(dayOfWeek: number): DayOfWeek;
+    valueOf(name: string): DayOfWeek;
+    values(): DayOfWeek[];
+}
 
+export interface DayOfWeek extends TemporalAccessor, TemporalAdjuster, Comparable<DayOfWeek> {
     adjustInto(temporal: Temporal): Temporal;
-    compareTo(other: DayOfWeek): number;
-    equals(other: any): boolean;
     getLong(field: TemporalField): number;
     isSupported(field: TemporalField): boolean;
     minus(days: number): DayOfWeek;
@@ -2107,30 +2063,30 @@ export class DayOfWeek extends TemporalAccessor implements TemporalAdjuster {
     value(): number;
 }
 
-export class Month extends TemporalAccessor implements TemporalAdjuster {
-    static JANUARY: Month;
-    static FEBRUARY: Month;
-    static MARCH: Month;
-    static APRIL: Month;
-    static MAY: Month;
-    static JUNE: Month;
-    static JULY: Month;
-    static AUGUST: Month;
-    static SEPTEMBER: Month;
-    static OCTOBER: Month;
-    static NOVEMBER: Month;
-    static DECEMBER: Month;
+export const Month: MonthConstructor
 
-    static from(temporal: TemporalAccessor): Month;
-    static of(month: number): Month;
-    static valueOf(name: string): Month;
-    static values(): Month[];
+export interface MonthConstructor extends Prototype<Month> {
+    JANUARY: Month;
+    FEBRUARY: Month;
+    MARCH: Month;
+    APRIL: Month;
+    MAY: Month;
+    JUNE: Month;
+    JULY: Month;
+    AUGUST: Month;
+    SEPTEMBER: Month;
+    OCTOBER: Month;
+    NOVEMBER: Month;
+    DECEMBER: Month;
 
-    private constructor();
+    from(temporal: TemporalAccessor): Month;
+    of(month: number): Month;
+    valueOf(name: string): Month;
+    values(): Month[];
+}
 
+export interface Month extends TemporalAccessor, TemporalAdjuster, Comparable<Month> {
     adjustInto(temporal: Temporal): Temporal;
-    compareTo(other: Month): number;
-    equals(other: any): boolean;
     firstDayOfYear(leapYear: boolean): number;
     firstMonthOfQuarter(): Month;
     getLong(field: TemporalField): number;
@@ -2151,21 +2107,23 @@ export class Month extends TemporalAccessor implements TemporalAdjuster {
 //   FORMAT
 // ----------------------------------------------------------------------------
 
-export class DateTimeFormatter {
-    static ISO_LOCAL_DATE: DateTimeFormatter;
-    static ISO_LOCAL_TIME: DateTimeFormatter;
-    static ISO_LOCAL_DATE_TIME: DateTimeFormatter;
-    static ISO_INSTANT: DateTimeFormatter;
-    static ISO_OFFSET_DATE_TIME: DateTimeFormatter;
-    static ISO_OFFSET_TIME: DateTimeFormatter;
-    static ISO_ZONED_DATE_TIME: DateTimeFormatter;
+export const DateTimeFormatter: DateTimeFormatterConstructor
 
-    static ofPattern(pattern: string): DateTimeFormatter;
-    static parsedExcessDays(): TemporalQuery<Period>;
-    static parsedLeapSecond(): TemporalQuery<boolean>;
+export interface DateTimeFormatterConstructor extends Prototype<DateTimeFormatter> {
+    ISO_LOCAL_DATE: DateTimeFormatter;
+    ISO_LOCAL_TIME: DateTimeFormatter;
+    ISO_LOCAL_DATE_TIME: DateTimeFormatter;
+    ISO_INSTANT: DateTimeFormatter;
+    ISO_OFFSET_DATE_TIME: DateTimeFormatter;
+    ISO_OFFSET_TIME: DateTimeFormatter;
+    ISO_ZONED_DATE_TIME: DateTimeFormatter;
 
-    private constructor();
+    ofPattern(pattern: string): DateTimeFormatter;
+    parsedExcessDays(): TemporalQuery<Period>;
+    parsedLeapSecond(): TemporalQuery<boolean>;
+}
 
+export interface DateTimeFormatter {
     chronology(): Chronology | null;
     decimalStyle(): DecimalStyle;
     format(temporal: TemporalAccessor): string;
@@ -2177,9 +2135,7 @@ export class DateTimeFormatter {
     withResolverStyle(resolverStyle: ResolverStyle): DateTimeFormatter;
 }
 
-export class DateTimeFormatterBuilder {
-    constructor();
-
+export interface DateTimeFormatterBuilder {
     append(formatter: DateTimeFormatter): DateTimeFormatterBuilder;
     appendFraction(field: TemporalField, minWidth: number, maxWidth: number, decimalPoint: boolean): DateTimeFormatterBuilder;
     appendInstant(fractionalDigits: number): DateTimeFormatterBuilder;
@@ -2200,9 +2156,7 @@ export class DateTimeFormatterBuilder {
     toFormatter(resolverStyle?: ResolverStyle): DateTimeFormatter;
 }
 
-export class DecimalStyle {
-    private constructor();
-
+export interface DecimalStyle {
     decimalSeparator(): string;
     equals(other: any): boolean;
     hashCode(): any;
@@ -2212,42 +2166,48 @@ export class DecimalStyle {
     zeroDigit(): string;
 }
 
-export class ResolverStyle {
-    static STRICT: ResolverStyle;
-    static SMART: ResolverStyle;
-    static LENIENT: ResolverStyle;
+export const ResolverStyle: ResolverStyleConstructor
 
-    private constructor();
+export interface ResolverStyleConstructor extends Prototype<ResolverStyle> {
+    STRICT: ResolverStyle;
+    SMART: ResolverStyle;
+    LENIENT: ResolverStyle;
+}
 
+export interface ResolverStyle {
     equals(other: any): boolean;
     toJSON(): string;
     toString(): string;
 }
 
-export class SignStyle {
-    static NORMAL: SignStyle;
-    static NEVER: SignStyle;
-    static ALWAYS: SignStyle;
-    static EXCEEDS_PAD: SignStyle;
-    static NOT_NEGATIVE: SignStyle;
+export const SignStyle: SignStyleConstructor
 
-    private constructor();
+export interface SignStyleConstructor extends Prototype<SignStyle> {
+    NORMAL: SignStyle;
+    NEVER: SignStyle;
+    ALWAYS: SignStyle;
+    EXCEEDS_PAD: SignStyle;
+    NOT_NEGATIVE: SignStyle;
+}
 
+export interface SignStyle {
     equals(other: any): boolean;
     toJSON(): string;
     toString(): string;
 }
 
-export class TextStyle {
-    static FULL: TextStyle;
-    static FULL_STANDALONE: TextStyle;
-    static SHORT: TextStyle;
-    static SHORT_STANDALONE: TextStyle;
-    static NARROW: TextStyle;
-    static NARROW_STANDALONE: TextStyle;
+export const TextStyle: TextStyleConstructor
 
-    private constructor();
+export interface TextStyleConstructor extends Prototype<TextStyle> {
+    FULL: TextStyle;
+    FULL_STANDALONE: TextStyle;
+    SHORT: TextStyle;
+    SHORT_STANDALONE: TextStyle;
+    NARROW: TextStyle;
+    NARROW_STANDALONE: TextStyle;
+}
 
+export interface TextStyle {
     asNormal(): TextStyle;
     asStandalone(): TextStyle;
     isStandalone(): boolean;
@@ -2257,9 +2217,7 @@ export class TextStyle {
     toString(): string;
 }
 
-export class ParsePosition {
-    constructor(index: number);
-
+export interface ParsePosition {
     getIndex(): number;
     setIndex(index: number): void;
     getErrorIndex(): number;
@@ -2270,17 +2228,17 @@ export class ParsePosition {
 //   ZONE
 // ----------------------------------------------------------------------------
 
-export class ZoneOffsetTransition {
-    static of(transition: LocalDateTime, offsetBefore: ZoneOffset, offsetAfter: ZoneOffset): ZoneOffsetTransition;
+export const ZoneOffsetTransition: ZoneOffsetTransitionConstructor
 
-    private constructor();
+export interface ZoneOffsetTransitionConstructor extends Prototype<ZoneOffsetTransition> {
+    of(transition: LocalDateTime, offsetBefore: ZoneOffset, offsetAfter: ZoneOffset): ZoneOffsetTransition;
+}
 
-    compareTo(transition: ZoneOffsetTransition): number;
+export interface ZoneOffsetTransition extends Comparable<ZoneOffsetTransition> {
     dateTimeAfter(): LocalDateTime;
     dateTimeBefore(): LocalDateTime;
     duration(): Duration;
     durationSeconds(): number;
-    equals(other: any): boolean;
     hashCode(): number;
     instant(): Instant;
     isGap(): boolean;
@@ -2297,9 +2255,13 @@ export interface ZoneOffsetTransitionRule {
     // TODO: Not implemented yet
 }
 
-export abstract class ZoneRules {
-    static of(offest: ZoneOffset): ZoneRules;
+export const ZoneRules: ZoneRulesConstructor
 
+export interface ZoneRulesConstructor extends Prototype<ZoneRules> {
+    of(offest: ZoneOffset): ZoneRules;
+}
+
+export interface ZoneRules {
     /**
      * Gets the offset applicable at the specified instant in these rules.
      *
@@ -2332,23 +2294,23 @@ export abstract class ZoneRules {
      */
     offset(localDateTime: LocalDateTime): ZoneOffset;
     toJSON(): string;
-    abstract daylightSavings(instant: Instant): Duration;
-    abstract isDaylightSavings(instant: Instant): boolean;
-    abstract isFixedOffset(): boolean;
+    daylightSavings(instant: Instant): Duration;
+    isDaylightSavings(instant: Instant): boolean;
+    isFixedOffset(): boolean;
     /**
      * Checks if the offset date-time is valid for these rules.
      *
      * To be valid, the local date-time must not be in a gap and the offset must match the
      * valid offsets.
      */
-    abstract isValidOffset(localDateTime: LocalDateTime, offset: ZoneOffset): boolean;
-    abstract nextTransition(instant: Instant): ZoneOffsetTransition;
-    abstract offsetOfEpochMilli(epochMilli: number): ZoneOffset;
-    abstract offsetOfInstant(instant: Instant): ZoneOffset;
-    abstract offsetOfLocalDateTime(localDateTime: LocalDateTime): ZoneOffset;
-    abstract previousTransition(instant: Instant): ZoneOffsetTransition;
-    abstract standardOffset(instant: Instant): ZoneOffset;
-    abstract toString(): string;
+    isValidOffset(localDateTime: LocalDateTime, offset: ZoneOffset): boolean;
+    nextTransition(instant: Instant): ZoneOffsetTransition;
+    offsetOfEpochMilli(epochMilli: number): ZoneOffset;
+    offsetOfInstant(instant: Instant): ZoneOffset;
+    offsetOfLocalDateTime(localDateTime: LocalDateTime): ZoneOffset;
+    previousTransition(instant: Instant): ZoneOffsetTransition;
+    standardOffset(instant: Instant): ZoneOffset;
+    toString(): string;
     /**
      * Gets the offset transition applicable at the specified local date-time in these rules.
      *
@@ -2380,9 +2342,9 @@ export abstract class ZoneRules {
      *
      * @returns the offset transition, `null` if the local date-time is not in transition.
      */
-    abstract transition(localDateTime: LocalDateTime): ZoneOffsetTransition;
-    abstract transitionRules(): ZoneOffsetTransitionRule[];
-    abstract transitions(): ZoneOffsetTransition[];
+    transition(localDateTime: LocalDateTime): ZoneOffsetTransition;
+    transitionRules(): ZoneOffsetTransitionRule[];
+    transitions(): ZoneOffsetTransition[];
     /**
      * Gets the offset applicable at the specified local date-time in these rules.
      *
@@ -2420,12 +2382,17 @@ export abstract class ZoneRules {
      * the history of time-zones and thus has no special handling. However, if it were to
      * happen, then the list would return more than 2 entries.
      */
-    abstract validOffsets(localDateTime: LocalDateTime): ZoneOffset[];
+    validOffsets(localDateTime: LocalDateTime): ZoneOffset[];
 }
 
-export class ZoneRulesProvider {
-    static getRules(zoneId: string): ZoneRules;
-    static getAvailableZoneIds(): string[];
+export const ZoneRulesProvider: ZoneRulesProviderConstructor
+
+export interface ZoneRulesProviderConstructor extends Prototype<ZoneRulesProvider> {
+    getRules(zoneId: string): ZoneRules;
+    getAvailableZoneIds(): string[];
+}
+
+export interface ZoneRulesProvider {
 }
 
 // ----------------------------------------------------------------------------
@@ -2437,36 +2404,33 @@ export class ZoneRulesProvider {
 // for now. Change this if Chronology is added.
 export type Chronology = IsoChronology;
 
-export abstract class IsoChronology {
-    static isLeapYear(prolepticYear: number): boolean;
+export const IsoChronology: IsoChronologyConstructor
 
-    private constructor();
+export interface IsoChronologyConstructor extends Prototype<IsoChronology> {
+    isLeapYear(prolepticYear: number): boolean;
+}
 
+export interface IsoChronology {
     equals(other: any): boolean;
     resolveDate(fieldValues: any, resolverStyle: any): any;
     toString(): string;
 }
 
-export abstract class ChronoLocalDate extends Temporal implements TemporalAdjuster {
+export interface ChronoLocalDate extends Temporal, TemporalAdjuster {
     adjustInto(temporal: Temporal): Temporal;
     format(formatter: DateTimeFormatter): string;
     isSupported(fieldOrUnit: TemporalField | TemporalUnit): boolean;
 }
 
-export abstract class ChronoLocalDateTime extends Temporal implements TemporalAdjuster {
+export interface ChronoLocalDateTime extends Temporal, TemporalAdjuster {
     adjustInto(temporal: Temporal): Temporal;
     chronology(): Chronology;
     toEpochSecond(offset: ZoneOffset): number;
     toInstant(offset: ZoneOffset): Instant;
 }
 
-export abstract class ChronoZonedDateTime extends Temporal {
-    compareTo(other: ChronoZonedDateTime): number;
-    equals(other: any): boolean;
+export interface ChronoZonedDateTime extends Temporal, ComparableEx<ChronoZonedDateTime> {
     format(formatter: DateTimeFormatter): string;
-    isAfter(other: ChronoZonedDateTime): boolean;
-    isBefore(other: ChronoZonedDateTime): boolean;
-    isEqual(other: ChronoZonedDateTime): boolean;
     toEpochSecond(): number;
     toInstant(): Instant;
 }

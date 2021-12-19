@@ -37,6 +37,7 @@
     "build-dist": "npx rollup -c rollup.config.js",
     "build-md-toc": "npx markdown-toc -i CheatSheet.md",
     "build-gz-check": "gzip -kf dist/js-joda.min.js && ls -alh ./dist/js-joda.min.js*",
+    "export": "npm run build-dist && npm pack && mv js-joda-core-4.3.1-*.tgz ../../../car-manager/shared",
     "lint": "npx eslint  ."
   },
   "keywords": [

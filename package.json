@@ -5,6 +5,9 @@
     "type": "git",
     "url": "https://github.com/js-joda/js-joda.git"
   },
+  "publishConfig": {
+    "registry": "https://registry.carsync.io"
+  },
   "author": "pithu",
   "contributors": [
     "pithu",
