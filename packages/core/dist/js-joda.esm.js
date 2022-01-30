@@ -1,4 +1,4 @@
-//! @version @js-joda/core - 4.1.0-cs1
+//! @version @js-joda/core - 4.1.0-cs2
 //! @copyright (c) 2015-present, Philipp Thürwächter, Pattrick Hüper & js-joda contributors
 //! @copyright (c) 2007-present, Stephen Colebourne & Michael Nascimento Santos
 //! @license BSD-3-Clause (see LICENSE in the root directory of this source tree)
@@ -12699,7 +12699,7 @@ var SystemClock = function (_Clock) {
   };
 
   _proto2.instant = function instant() {
-    return Instant.ofEpochMilli(this.millis());
+    return Instant._create(Math.trunc(Date.now() / 1000), 0);
   };
 
   _proto2.equals = function equals(obj) {

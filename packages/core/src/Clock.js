@@ -215,7 +215,7 @@ class SystemClock extends Clock {
      * @returns {Instant}
      */
     instant() {
-        return Instant.ofEpochMilli(this.millis());
+        return Instant._create(Math.trunc(Date.now() / 1000), 0)
     }
     
     equals(obj) {    
