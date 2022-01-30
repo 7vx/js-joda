@@ -2443,16 +2443,6 @@ export interface ChronoZonedDateTime extends Temporal, ComparableEx<ChronoZonedD
 //   SUPPORT
 // ----------------------------------------------------------------------------
 
-export function nativeJs(date: Date | any, zone?: ZoneId): TemporalAccessor;
-
-export function convert(
-    temporal: LocalDate | LocalDateTime | ZonedDateTime | Instant,
-    zone?: ZoneId,
-): {
-    toDate: () => Date;
-    toEpochMilli: () => number;
-};
-
 export function use(plugin: Function): any;
 
 // ----------------------------------------------------------------------------
@@ -2479,3 +2469,11 @@ export class NullPointerException extends Error { }
 
 export const __esModule: true;
 export as namespace JSJoda;
+
+// HELPERS
+
+// https://stackoverflow.com/questions/54520676/in-typescript-how-to-get-the-keys-of-an-object-type-whose-values-are-of-a-given
+type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T]
+
+export type DayOfWeekConsts = Exclude<KeysMatching<DayOfWeekConstructor, DayOfWeek>, 'prototype'>
+export type ChronoUnitConsts = Exclude<KeysMatching<ChronoUnitConstructor, ChronoUnit>, 'prototype'>
