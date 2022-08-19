@@ -1,6 +1,6 @@
 {
   "name": "@js-joda/core",
-  "version": "5.2.0",
+  "version": "6.0.0",
   "publishConfig": {
     "registry": "https://us-central1-npm.pkg.dev/ridemycar-1483775910341/carsync/"
   },
